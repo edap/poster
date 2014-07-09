@@ -1,6 +1,3 @@
-// Prime factorization derived from slightly modified version of
-// sieve.go in Go source distribution.
-
 package composer
 
 import (
@@ -31,6 +28,8 @@ func Filter(in <-chan int, out chan<- int, prime int) {
 	out <- -1
 }
 
+// Prime factorization derived from slightly modified version of
+// sieve.go in Go source distribution.
 func CalcPrimeFactors(number_to_factorize int) []int {
 	rv := []int{}
 	ch := make(chan int)                 // Create a new channel.

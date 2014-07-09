@@ -20,8 +20,10 @@ func (a *wrongArgumentError) Error() string {
 }
 
 type Image interface {
-	Move(src_path, dst_path string) error
 	HasDesiredDimension() (bool, error)
+	CurrentWidth() int
+	CurrentHeight() int
+	Move(src_path, dst_path string) error
 	Copy(src_path, dst_path string) (int64, error)
 	Scale(img_path string) error
 }
@@ -42,6 +44,14 @@ func NewThumb(img_width int, img_height int, thumb_width int, thumb_height int, 
 		desired_height: thumb_height,
 		img_name:       img_name,
 	}
+}
+
+func (t *Thumb) CurrentWidth() int {
+	return t.width
+}
+
+func (t *Thumb) CurrentHeight() int {
+	return t.height
 }
 
 func (t *Thumb) Scale(img_path string) error {

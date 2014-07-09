@@ -22,13 +22,40 @@ var source_dir = flag.String("source_dir", "/home/da/to_merge", "the origin dire
 var target_dir = flag.String("target_dir", "/home/da/to_merge/merged", "the destination directory that will containe the final grid")
 
 // implementare log, o almeno, avere una politica coerente sugli errori
+func countFiles() int {
+	dirname := *source_dir
+	d, err := os.Open(dirname)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer d.Close()
+	fi, err := d.Readdir(-1)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	tot := 0
+	for _, fi := range fi {
+		if fi.Mode().IsRegular() {
+			tot += 1
+			//fmt.Println(fi.Name(), fi.Size(), "bytes")
+		}
+	}
+	return tot
+}
+
+// creare il test per countFiles
+// far si che count files diventi count images, e che chekki il tipo di immagine(o converta tutto a jpg)
+// visto che ha i bytes, potrebbe dare un messaggio interessante durante il procedimento
+// se non ci sono immagini, countImages mi dice di dargli una cartella con le immagini, e mi fa una faccina buffa
 
 func main() {
 	flag.Parse()
 	if err := os.MkdirAll(*target_dir, 0755); err != nil {
 		log.Fatal("impossible to create target directory")
 	}
-	rv := comp.CalcPrimeFactors(10)
+	rv := comp.CalcPrimeFactors(countFiles())
 	fmt.Println(rv)
 	files, _ := ioutil.ReadDir(*source_dir)
 	for _, imgFile := range files {
@@ -46,7 +73,11 @@ func main() {
 				fmt.Fprintf(os.Stderr, "%s: %v\n", imgFile.Name(), err)
 				continue
 			}
-
+			fmt.Println(im.Width)
+			fmt.Println(im.Height)
+			fmt.Println(*thumb_width)
+			fmt.Println(*thumb_height)
+			fmt.Println(img_name)
 			// qui va implementata la logica che conta le immagini, calcola un quadro,
 			// e dice su quante linee devono essere disposte le immagini
 
@@ -68,7 +99,7 @@ func main() {
 			}
 			thumb.Scale(dst_path)
 
-			fmt.Printf("%s %d %d\n", imgFile.Name(), thumb.width, thumb.height)
+			fmt.Printf("%s %d %d\n", imgFile.Name(), thumb.CurrentWidth(), thumb.CurrentHeight())
 		} else {
 			fmt.Println("no")
 		}
