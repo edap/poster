@@ -3,27 +3,121 @@ package main
 import (
 	"flag"
 	"fmt"
-	comp "github.com/edap/gomerger/composer"
 	"image"
 	"io/ioutil"
 	"log"
 	//"math"
 	"os"
 	"path/filepath"
+	"regexp"
 	//errors
 )
 
-var thumb_width = flag.Int("thumb_width", 120, "the width of a single thumb")
-var thumb_height = flag.Int("thumb_height", 90, "the height of a single thumb")
+// creare il test per countFiles
+// far si che count files diventi count images, e che chekki il tipo di immagine(o converta tutto a jpg)
+// visto che ha i bytes, potrebbe dare un messaggio interessante durante il procedimento
+// se non ci sono immagini, countImages mi dice di dargli una cartella con le immagini, e mi fa una faccina buffa
 
-// var allow_scaling = scale images if it is a prime number
-var erase_original = flag.Bool("erase_original", false, "erase the original thumb after being merged into the grid")
-var source_dir = flag.String("source_dir", "/home/da/to_merge", "the origin directory that contains the images to compose the grid")
-var target_dir = flag.String("target_dir", "/home/da/to_merge/merged", "the destination directory that will containe the final grid")
+func main() {
+	var (
+		//ar allow_scaling = scale images if it is a prime number
+		thumb_width    = flag.Int("thumb_width", 120, "the width of a single thumb")
+		thumb_height   = flag.Int("thumb_height", 90, "the height of a single thumb")
+		erase_original = flag.Bool("erase_original", false, "erase the original thumbs after being merged into the grid")
+		source_dir     = flag.String("source_dir", "/home/da/to_merge", "the origin directory that contains the images to compose the grid")
+		target_dir     = flag.String("target_dir", "/home/da/to_merge/merged", "the destination directory that will contain the final grid")
+	)
+	flag.Parse()
+
+	if err := os.MkdirAll(*target_dir, 0755); err != nil {
+		log.Fatal("impossible to create target directory")
+	}
+	total_images := countImages(*source_dir)
+
+	res := map[string]int{
+		"area":    total_images,
+		"height":  0,
+		"base":    0,
+		"skipped": 0,
+	}
+	rect := CalculateRectangle(res)
+	fmt.Println(rect)
+	CreateCanvas(rect["height"], rect["base"], *thumb_width, *thumb_height, "/home/da/to_merge/merged/test.jpg")
+	// fin qua ci siamo, la destinazione e' creata.
+	// ORA
+	// copiare una thumb in una posizione desiderata
+	// iterare tra le immagini e cambiare le coordinate
+	// creare l'immagine di destinazione con un nome random
+	// rimuovere l'opzione delete originals
+	// rimuovere l'opzione dest source, semmai metterci dest file. default la current directory
+	// log, cosa succede se lancio il programma in una cartella con solo txt files?
+	// prompt interattivo che mi dice: ci impiegherai circa x sec. Vuoi continuare. Oppure senza prompt
+	// scrivere tests
+	// guardare come gli altri scrivono la documentazione, documentare una funzione ogni volta che la scrivi
+	// impararti i metodi principali di os e di image
+
+	files, _ := ioutil.ReadDir(*source_dir)
+	for _, imgFile := range files {
+		if isImage(imgFile.Name()) {
+
+			img_name := imgFile.Name()
+			dst_path := filepath.Join(*source_dir, img_name)
+			src_path := filepath.Join(*target_dir, img_name)
+			if reader, err := os.Open(src_path); err == nil {
+				defer reader.Close()
+
+				im, _, err := image.DecodeConfig(reader)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "%s: %v\n", imgFile.Name(), err)
+					continue
+				}
+				fmt.Println(im.Width)
+				fmt.Println(im.Height)
+				fmt.Println(*thumb_width)
+				fmt.Println(*thumb_height)
+				fmt.Println(img_name)
+				// qui va implementata la logica che conta le immagini, calcola un quadro,
+				// e dice su quante linee devono essere disposte le immagini
+
+				// thumb := &Thumb{
+				// 	width:          im.Width,
+				// 	height:         im.Height,
+				// 	desired_width:  *thumb_width,
+				// 	desired_height: *thumb_height,
+				// 	img_name:       img_name,
+				// }
+
+				thumb := NewThumb(im.Width, im.Height, *thumb_width, *thumb_height, img_name)
+				thumb.HasDesiredDimension()
+
+				if *erase_original == true {
+					thumb.Move(src_path, dst_path)
+				} else {
+					thumb.Copy(src_path, dst_path)
+				}
+				thumb.Scale(dst_path)
+
+				fmt.Printf("%s %d %d\n", imgFile.Name(), thumb.CurrentWidth(), thumb.CurrentHeight())
+			} else {
+				fmt.Println("no")
+			}
+		}
+	}
+
+	// now go to the merged folder, count the images
+	// use the composer
+	// create an empty square
+	// past the images in the empty square
+}
+
+func isImage(filename string) bool {
+	is_img, _ := regexp.MatchString("png$|jpg$|jpeg$|gif$", filename)
+	return is_img
+}
 
 // implementare log, o almeno, avere una politica coerente sugli errori
-func countFiles() int {
-	dirname := *source_dir
+func countImages(source_dir string) int {
+	dirname := source_dir
 	d, err := os.Open(dirname)
 	if err != nil {
 		fmt.Println(err)
@@ -37,78 +131,12 @@ func countFiles() int {
 	}
 	tot := 0
 	for _, fi := range fi {
-		if fi.Mode().IsRegular() {
+		if fi.Mode().IsRegular() && isImage(fi.Name()) {
 			tot += 1
 			//fmt.Println(fi.Name(), fi.Size(), "bytes")
 		}
 	}
 	return tot
-}
-
-// creare il test per countFiles
-// far si che count files diventi count images, e che chekki il tipo di immagine(o converta tutto a jpg)
-// visto che ha i bytes, potrebbe dare un messaggio interessante durante il procedimento
-// se non ci sono immagini, countImages mi dice di dargli una cartella con le immagini, e mi fa una faccina buffa
-
-func main() {
-	flag.Parse()
-	if err := os.MkdirAll(*target_dir, 0755); err != nil {
-		log.Fatal("impossible to create target directory")
-	}
-	rv := comp.CalcPrimeFactors(countFiles())
-	fmt.Println(rv)
-	files, _ := ioutil.ReadDir(*source_dir)
-	for _, imgFile := range files {
-		if imgFile.IsDir() { // controllare se e' jpg, invece che se e' directory
-			continue
-		}
-		img_name := imgFile.Name()
-		dst_path := filepath.Join(*source_dir, img_name)
-		src_path := filepath.Join(*target_dir, img_name)
-		if reader, err := os.Open(src_path); err == nil {
-			defer reader.Close()
-
-			im, _, err := image.DecodeConfig(reader)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%s: %v\n", imgFile.Name(), err)
-				continue
-			}
-			fmt.Println(im.Width)
-			fmt.Println(im.Height)
-			fmt.Println(*thumb_width)
-			fmt.Println(*thumb_height)
-			fmt.Println(img_name)
-			// qui va implementata la logica che conta le immagini, calcola un quadro,
-			// e dice su quante linee devono essere disposte le immagini
-
-			// thumb := &Thumb{
-			// 	width:          im.Width,
-			// 	height:         im.Height,
-			// 	desired_width:  *thumb_width,
-			// 	desired_height: *thumb_height,
-			// 	img_name:       img_name,
-			// }
-
-			thumb := NewThumb(im.Width, im.Height, *thumb_width, *thumb_height, img_name)
-			thumb.HasDesiredDimension()
-
-			if *erase_original == true {
-				thumb.Move(src_path, dst_path)
-			} else {
-				thumb.Copy(src_path, dst_path)
-			}
-			thumb.Scale(dst_path)
-
-			fmt.Printf("%s %d %d\n", imgFile.Name(), thumb.CurrentWidth(), thumb.CurrentHeight())
-		} else {
-			fmt.Println("no")
-		}
-	}
-
-	// now go to the merged folder, count the images
-	// use the composer
-	// create an empty square
-	// past the images in the empty square
 }
 
 // conta le immagini che ha nella directory, cerca di rispettare le proporzioni
@@ -153,19 +181,4 @@ func main() {
 //   // write new image to file
 //   jpeg.Encode(out, m, nil)
 //   return 2, nil
-// }
-
-// CREATE IMAGE
-// func createImage() (bool, error) {
-// 	m := image.NewRGBA(image.Rect(0, 0, 120, 90))
-
-// 	out, err := os.Create("test_images/120x90.jpg")
-// 	if err != nil {
-// 		fmt.Println("imm non create")
-// 	}
-// 	defer out.Close()
-
-// 	// write new image to file
-// 	jpeg.Encode(out, m, nil)
-// 	return true, err
 // }

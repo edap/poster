@@ -1,4 +1,4 @@
-package composer
+package main
 
 import (
 	. "github.com/smartystreets/goconvey/convey"
@@ -33,6 +33,19 @@ func TestGetBaseAndHeight(t *testing.T) {
 
 	})
 }
+
+// func TestCreateCanvas(t *testing.T) {
+// 	Convey("Given n rows, n cols of the grid, and width and height of a thumb, create the canvas", t, func() {
+// 		r := []int{2, 3}
+// 		err, grid, image := CreateCanvas(2, 3, 120, 90, "test_images/120x90.jpg")
+// 		So(err, ShouldBeNil)
+// 		So(grid[0][0], ShouldEqual, 0)
+// 		So(grid[1][0], ShouldEqual, 120)
+// 		So(grid[1][0], ShouldEqual, 0)
+// 		So(h, ShouldEqual, 2)
+
+// 	})
+// }
 
 func TestCalculateRectangle(t *testing.T) {
 	Convey("Given a number representing the area of a rectang, calculate base and height", t, func() {

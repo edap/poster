@@ -1,9 +1,12 @@
-package composer
+package main
 
 import (
 	//"errors"
-	// "fmt"
+	"fmt"
+	"image"
+	"image/jpeg"
 	"math"
+	"os"
 )
 
 // Generate numbers until the limit max.
@@ -109,6 +112,19 @@ func IsASquare(number_to_square int) (bool, float64) {
 	side := math.Sqrt(float64(number_to_square))
 	side_without_decimals := float64(int(side))
 	return ((side - side_without_decimals) == 0), side
+}
+
+func CreateCanvas(rows int, columns int, width int, height int, name string) error {
+	m := image.NewRGBA(image.Rect(0, 0, width*columns, height*rows))
+
+	out, err := os.Create(name)
+	if err != nil {
+		panic(fmt.Sprintf("is not possible to create the file %s necessary for testing", name))
+	}
+	defer out.Close()
+
+	canvas := jpeg.Encode(out, m, nil)
+	return canvas
 }
 
 // // func recursiveDiminuisci di uno e chiama calcPrimeNumbers

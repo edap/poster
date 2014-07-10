@@ -2,37 +2,15 @@ package main
 
 import (
 	_ "errors"
-	"fmt"
+	//"fmt"
 	_ "github.com/nfnt/resize"
 	. "github.com/smartystreets/goconvey/convey"
-	"image"
+	//"image"
 	_ "image/color"
-	"image/jpeg"
-	"os"
+	//"image/jpeg"
+	//"os"
 	"testing"
 )
-
-func createImage(name string) (bool, error) {
-	m := image.NewRGBA(image.Rect(0, 0, 120, 90))
-
-	out, err := os.Create(name)
-	if err != nil {
-		panic(fmt.Sprintf("is not possible to create the file %s necessary for testing", name))
-	}
-	defer out.Close()
-
-	jpeg.Encode(out, m, nil)
-	return true, err
-}
-
-func openThumb(img_path string) (*os.File, error) {
-	if file, err := os.Open(img_path); err == nil {
-		defer file.Close()
-		return file, nil
-	} else {
-		panic(fmt.Sprintf("is not possible to open the file %s necessary for testing", img_path))
-	}
-}
 
 func TestHasDesiredDimension(t *testing.T) {
 	Convey("Check if an image has the same desired dimension", t, func() {
