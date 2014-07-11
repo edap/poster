@@ -112,7 +112,6 @@ func (t *Thumb) Move(src_path, dst_path string) error {
 }
 
 func (t *Thumb) HasDesiredDimension() (bool, error) {
-
 	if t.desired_height < 1 {
 		return false, &wrongArgumentError{"thumb_height"}
 	}

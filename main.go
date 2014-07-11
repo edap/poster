@@ -21,11 +21,11 @@ import (
 func main() {
 	var (
 		//ar allow_scaling = scale images if it is a prime number
-		thumb_width    = flag.Int("thumb_width", 120, "the width of a single thumb")
-		thumb_height   = flag.Int("thumb_height", 90, "the height of a single thumb")
-		erase_original = flag.Bool("erase_original", false, "erase the original thumbs after being merged into the grid")
-		source_dir     = flag.String("source_dir", "/home/da/to_merge", "the origin directory that contains the images to compose the grid")
-		target_dir     = flag.String("target_dir", "/home/da/to_merge/merged", "the destination directory that will contain the final grid")
+		thumb_width  = flag.Int("thumb_width", 120, "the width of a single thumb")
+		thumb_height = flag.Int("thumb_height", 90, "the height of a single thumb")
+		//erase_original = flag.Bool("erase_original", false, "erase the original thumbs after being merged into the grid")
+		source_dir = flag.String("source_dir", "/home/da/to_merge", "the origin directory that contains the images to compose the grid")
+		target_dir = flag.String("target_dir", "/home/da/to_merge/merged", "the destination directory that will contain the final grid")
 	)
 	flag.Parse()
 
@@ -42,10 +42,26 @@ func main() {
 	}
 	rect := CalculateRectangle(res)
 	fmt.Println(rect)
-	CreateCanvas(rect["height"], rect["base"], *thumb_width, *thumb_height, "/home/da/to_merge/merged/test.jpg")
+	CreateCanvas(
+		rect["height"],
+		rect["base"],
+		*thumb_width,
+		*thumb_height,
+		"/home/da/to_merge/merged/test.jpg")
 	// fin qua ci siamo, la destinazione e' creata.
 	// ORA
 	// copiare una thumb in una posizione desiderata
+	// decodificare sempre in jpg
+
+	// convertToPNG converts from any recognized format to PNG.
+	// func convertToPNG(w io.Writer, r io.Reader) error {
+	//  img, _, err := image.Decode(r)
+	//  if err != nil {
+	//   return err
+	//  }
+	//  return png.Encode(w, img)
+	// }
+
 	// iterare tra le immagini e cambiare le coordinate
 	// creare l'immagine di destinazione con un nome random
 	// rimuovere l'opzione delete originals
@@ -61,8 +77,8 @@ func main() {
 		if isImage(imgFile.Name()) {
 
 			img_name := imgFile.Name()
-			dst_path := filepath.Join(*source_dir, img_name)
-			src_path := filepath.Join(*target_dir, img_name)
+			src_path := filepath.Join(*source_dir, img_name)
+			//dst_path := filepath.Join(*target_dir, img_name)
 			if reader, err := os.Open(src_path); err == nil {
 				defer reader.Close()
 
@@ -90,12 +106,12 @@ func main() {
 				thumb := NewThumb(im.Width, im.Height, *thumb_width, *thumb_height, img_name)
 				thumb.HasDesiredDimension()
 
-				if *erase_original == true {
-					thumb.Move(src_path, dst_path)
-				} else {
-					thumb.Copy(src_path, dst_path)
-				}
-				thumb.Scale(dst_path)
+				// if *erase_original == true {
+				// 	thumb.Move(src_path, dst_path)
+				// } else {
+				// 	thumb.Copy(src_path, dst_path)
+				// }
+				// thumb.Scale(dst_path)
 
 				fmt.Printf("%s %d %d\n", imgFile.Name(), thumb.CurrentWidth(), thumb.CurrentHeight())
 			} else {
