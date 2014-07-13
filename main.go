@@ -1,9 +1,12 @@
 package main
 
 import (
+	"crypto/rand"
 	"flag"
 	"fmt"
 	"image"
+	"image/draw"
+	"image/jpeg"
 	"io/ioutil"
 	"log"
 	//"math"
@@ -14,45 +17,38 @@ import (
 )
 
 // creare il test per countFiles
-// far si che count files diventi count images, e che chekki il tipo di immagine(o converta tutto a jpg)
+// far si che count files diventi count images chiama la conversione a jpg (o converta tutto a jpg)
 // visto che ha i bytes, potrebbe dare un messaggio interessante durante il procedimento
 // se non ci sono immagini, countImages mi dice di dargli una cartella con le immagini, e mi fa una faccina buffa
 
 func main() {
 	var (
-		//ar allow_scaling = scale images if it is a prime number
 		thumb_width  = flag.Int("thumb_width", 120, "the width of a single thumb")
 		thumb_height = flag.Int("thumb_height", 90, "the height of a single thumb")
-		//erase_original = flag.Bool("erase_original", false, "erase the original thumbs after being merged into the grid")
-		source_dir = flag.String("source_dir", "/home/da/to_merge", "the origin directory that contains the images to compose the grid")
-		target_dir = flag.String("target_dir", "/home/da/to_merge/merged", "the destination directory that will contain the final grid")
+		source_dir   = flag.String("source_dir", "/home/da/to_merge", "the origin directory that contains the images to compose the grid")
+		canvas_file  = rand_str(20) + ".jpg"
 	)
 	flag.Parse()
-
-	if err := os.MkdirAll(*target_dir, 0755); err != nil {
-		log.Fatal("impossible to create target directory")
-	}
+	fmt.Println(canvas_file)
 	total_images := countImages(*source_dir)
-
+	//preparing the empty grid
 	res := map[string]int{
 		"area":    total_images,
 		"height":  0,
 		"base":    0,
 		"skipped": 0,
 	}
+	// fulfill te grid
 	rect := CalculateRectangle(res)
 	fmt.Println(rect)
-	CreateCanvas(
-		rect["height"],
-		rect["base"],
-		*thumb_width,
-		*thumb_height,
-		"/home/da/to_merge/merged/test.jpg")
-	// fin qua ci siamo, la destinazione e' creata.
-	// ORA
-	// copiare una thumb in una posizione desiderata
-	// decodificare sempre in jpg
 
+	// CreateCanvas(
+	// 	rect["height"],
+	// 	rect["base"],
+	// 	*thumb_width,
+	// 	*thumb_height,
+	// 	"/home/da/to_merge/merged/test.jpg")
+	// decodificare sempre in jpg
 	// convertToPNG converts from any recognized format to PNG.
 	// func convertToPNG(w io.Writer, r io.Reader) error {
 	//  img, _, err := image.Decode(r)
@@ -64,13 +60,14 @@ func main() {
 
 	// iterare tra le immagini e cambiare le coordinate
 	// creare l'immagine di destinazione con un nome random
-	// rimuovere l'opzione delete originals
-	// rimuovere l'opzione dest source, semmai metterci dest file. default la current directory
 	// log, cosa succede se lancio il programma in una cartella con solo txt files?
 	// prompt interattivo che mi dice: ci impiegherai circa x sec. Vuoi continuare. Oppure senza prompt
-	// scrivere tests
+
 	// guardare come gli altri scrivono la documentazione, documentare una funzione ogni volta che la scrivi
-	// impararti i metodi principali di os e di image
+
+	// create the canvas and coordinate
+	back := image.NewRGBA(image.Rect(0, 0, 800, 600))
+	var x, y = 0, 0
 
 	files, _ := ioutil.ReadDir(*source_dir)
 	for _, imgFile := range files {
@@ -78,7 +75,7 @@ func main() {
 
 			img_name := imgFile.Name()
 			src_path := filepath.Join(*source_dir, img_name)
-			//dst_path := filepath.Join(*target_dir, img_name)
+			//try to open it
 			if reader, err := os.Open(src_path); err == nil {
 				defer reader.Close()
 
@@ -87,38 +84,27 @@ func main() {
 					fmt.Fprintf(os.Stderr, "%s: %v\n", imgFile.Name(), err)
 					continue
 				}
-				fmt.Println(im.Width)
-				fmt.Println(im.Height)
-				fmt.Println(*thumb_width)
-				fmt.Println(*thumb_height)
-				fmt.Println(img_name)
-				// qui va implementata la logica che conta le immagini, calcola un quadro,
-				// e dice su quante linee devono essere disposte le immagini
-
-				// thumb := &Thumb{
-				// 	width:          im.Width,
-				// 	height:         im.Height,
-				// 	desired_width:  *thumb_width,
-				// 	desired_height: *thumb_height,
-				// 	img_name:       img_name,
-				// }
-
+				//check dimension and format
 				thumb := NewThumb(im.Width, im.Height, *thumb_width, *thumb_height, img_name)
 				thumb.HasDesiredDimension()
+				//thumb.forceJpg
 
-				// if *erase_original == true {
-				// 	thumb.Move(src_path, dst_path)
-				// } else {
-				// 	thumb.Copy(src_path, dst_path)
-				// }
-				// thumb.Scale(dst_path)
+				//add to canvas
+				img, _, _ := image.Decode(reader)
+				x -= 180
+				draw.Draw(back, back.Bounds(), img, image.Point{x, y}, draw.Src)
 
 				fmt.Printf("%s %d %d\n", imgFile.Name(), thumb.CurrentWidth(), thumb.CurrentHeight())
 			} else {
+				log.Fatal("impossible to create target directory")
 				fmt.Println("no")
 			}
 		}
 	}
+
+	toimg, _ := os.Create("/home/da/to_merge/" + canvas_file)
+	defer toimg.Close()
+	jpeg.Encode(toimg, back, &jpeg.Options{jpeg.DefaultQuality})
 
 	// now go to the merged folder, count the images
 	// use the composer
@@ -155,46 +141,12 @@ func countImages(source_dir string) int {
 	return tot
 }
 
-// conta le immagini che ha nella directory, cerca di rispettare le proporzioni
-// (date come parametro), e mette quello che ci sta. Quello che ci sta lo cancella (opzione delete?) quello che non ci sta viene salvato su un file, che fa da registro
-
-// package main
-
-// import (
-// 	"fmt"
-// 	"image"
-// 	"image/draw"
-// 	"image/jpeg"
-// 	"os"
-// )
-
-// func main() {
-// 	fImg1, _ := os.Open("/home/da/to_merge/Gwx_TPMT3Bg.jpg")
-// 	defer fImg1.Close()
-// 	img1, _, _ := image.Decode(fImg1)
-
-// 	m := image.NewRGBA(image.Rect(0, 0, 800, 600))
-// 	draw.Draw(m, m.Bounds(), img1, image.Point{0, 0}, draw.Src)
-// 	//draw.Draw(m, m.Bounds(), img2, image.Point{-200,-200}, draw.Src)
-
-// 	toimg, _ := os.Create("/home/da/to_merge/new.jpg")
-// 	defer toimg.Close()
-
-// 	jpeg.Encode(toimg, m, &jpeg.Options{jpeg.DefaultQuality})
-// }
-
-// http://golang.org/src/pkg/image/jpeg/reader.go?s=10946:10998#L343
-// http://golang.org/src/pkg/image/jpeg/reader.go?s=10744:10789#L336
-// func (t Thumb) Scale() (int, error) {
-//   // if HasDesiredDimension
-//   m := resize.Resize(300, 200, t.decoded_img, resize.NearestNeighbor)
-//   out, _ := os.Create("test_resized.jpg")
-//   // if err != nil {
-//   //  log.Fatal(err)
-//   // }
-//   defer out.Close()
-
-//   // write new image to file
-//   jpeg.Encode(out, m, nil)
-//   return 2, nil
-// }
+func rand_str(str_size int) string {
+	alphanum := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	var bytes = make([]byte, str_size)
+	rand.Read(bytes)
+	for i, b := range bytes {
+		bytes[i] = alphanum[b%byte(len(alphanum))]
+	}
+	return string(bytes)
+}
