@@ -54,6 +54,16 @@ func (t *Thumb) CurrentHeight() int {
 	return t.height
 }
 
+// decodificare sempre in jpg
+// convertToPNG converts from any recognized format to PNG.
+// func convertToPNG(w io.Writer, r io.Reader) error {
+//  img, _, err := image.Decode(r)
+//  if err != nil {
+//   return err
+//  }
+//  return png.Encode(w, img)
+// }
+
 func (t *Thumb) Scale(img_path string) error {
 	are_equal, err := t.HasDesiredDimension()
 	if err != nil {

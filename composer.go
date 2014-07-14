@@ -2,11 +2,11 @@ package main
 
 import (
 	//"errors"
-	"fmt"
-	"image"
-	"image/jpeg"
+	//"fmt"
+	//"image"
+	//"image/jpeg"
 	"math"
-	"os"
+	//"os"
 )
 
 // Generate numbers until the limit max.
@@ -114,27 +114,16 @@ func IsASquare(number_to_square int) (bool, float64) {
 	return ((side - side_without_decimals) == 0), side
 }
 
-func CreateCanvas(rows int, columns int, width int, height int, name string) error {
-	m := image.NewRGBA(image.Rect(0, 0, width*columns, height*rows))
-
-	out, err := os.Create(name)
-	if err != nil {
-		panic(fmt.Sprintf("is not possible to create the file %s necessary for testing", name))
+func CalculatePositions(rect map[string]int, images []string, thumb_width int, thumb_height int) map[string][2]int {
+	x, y := 0, 0
+	res := make(map[string][2]int)
+	for index, value := range images {
+		res[string(value)] = [2]int{x, y}
+		x -= thumb_width
+		if (index+1)%rect["base"] == 0 {
+			x = 0
+			y -= thumb_height
+		}
 	}
-	defer out.Close()
-
-	canvas := jpeg.Encode(out, m, nil)
-	return canvas
+	return res
 }
-
-// // func recursiveDiminuisci di uno e chiama calcPrimeNumbers
-// func main() {
-// 	res := map[string]int{
-// 		"area":    6,
-// 		"height":  0,
-// 		"base":    0,
-// 		"skipped": 0,
-// 	}
-// 	// CalcPrimeFactors(6)
-// 	CalculateRectangle(res)
-// }
