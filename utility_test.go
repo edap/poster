@@ -20,7 +20,7 @@ func TestIsImage(t *testing.T) {
 		Convey("return true if the extension is an image extension", func() {
 			jpegs := "image.jpg"
 			So(isImage(jpegs), ShouldBeTrue)
-			pngs := "image.jpg"
+			pngs := "image.png"
 			So(isImage(pngs), ShouldBeTrue)
 		})
 
