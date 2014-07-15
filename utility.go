@@ -9,7 +9,7 @@ import (
 )
 
 func isImage(filename string) bool {
-	is_img, _ := regexp.MatchString(".png$|.jpg$|.jpeg$|.gif$", filename)
+	is_img, _ := regexp.MatchString("(?i)\\.(png|jpg|jpeg|gif)$", filename)
 	return is_img
 }
 

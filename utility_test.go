@@ -18,16 +18,23 @@ func TestIsImage(t *testing.T) {
 	Convey("Given a name file", t, func() {
 
 		Convey("return true if the extension is an image extension", func() {
-			str := "image.jpg"
+			jpegs := "image.jpg"
+			So(isImage(jpegs), ShouldBeTrue)
+			pngs := "image.jpg"
+			So(isImage(pngs), ShouldBeTrue)
+		})
+
+		Convey("return true if the extension is an image extension, also for uppercase", func() {
+			str := "image.PNG"
 			So(isImage(str), ShouldBeTrue)
 		})
 
-		Convey("return true if the extension is an image extension", func() {
+		Convey("return false if the extension name is wrong written", func() {
 			str := "imagejpg"
 			So(isImage(str), ShouldBeFalse)
 		})
 
-		Convey("return false if the extension is not image extension", func() {
+		Convey("return false if the extension is not an image extension", func() {
 			str := "text.doc"
 			So(isImage(str), ShouldBeFalse)
 		})

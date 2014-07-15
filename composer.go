@@ -1,12 +1,7 @@
 package main
 
 import (
-	//"errors"
-	//"fmt"
-	//"image"
-	//"image/jpeg"
 	"math"
-	//"os"
 )
 
 // Generate numbers until the limit max.

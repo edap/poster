@@ -23,6 +23,8 @@ func main() {
 	flag.Parse()
 
 	tot, images := listFiles(*source_dir)
+	// procedi solo se a zero
+
 	//preparing the empty grid
 	res := map[string]int{"area": tot, "height": 0, "base": 0, "skipped": 0}
 	rect := CalculateRectangle(res)
@@ -30,19 +32,17 @@ func main() {
 
 	fmt.Println(rect)
 	fmt.Println(positions)
-	fmt.Println(*thumb_height)
-	fmt.Println(*thumb_width)
 
 	// create the canvas and coordinate
 	back := image.NewRGBA(image.Rect(0, 0, *thumb_width*res["base"], *thumb_height*res["height"]))
-	//back := image.NewRGBA(image.Rect(0, 0, *thumb_width*res["base"], *thumb_height*res["height"]))
 
 	for _, value := range images {
 		img_file, _ := os.Open(value)
 		defer img_file.Close()
+		img, _, _ := image.Decode(img_file)
+
 		x := positions[value][0]
 		y := positions[value][1]
-		img, _, _ := image.Decode(img_file)
 		draw.Draw(back, back.Bounds(), img, image.Point{x, y}, draw.Src)
 	}
 	toimg, _ := os.Create(canvas_file)
