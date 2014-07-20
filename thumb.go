@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/nfnt/resize"
+	"image"
 	"image/jpeg"
 	"io"
 	"log"
@@ -19,13 +20,15 @@ func (a *wrongArgumentError) Error() string {
 	return fmt.Sprintf("The argument %s can not be minor than 1", a.arg)
 }
 
-type Image interface {
+type Img interface {
 	HasDesiredDimension() (bool, error)
 	CurrentWidth() int
 	CurrentHeight() int
+	GetFormatFromExtension() (error, string)
 	Move(src_path, dst_path string) error
 	Copy(src_path, dst_path string) (int64, error)
 	Scale(img_path string) error
+	DecodeIt() (image.Image, error)
 }
 
 type Thumb struct {
@@ -36,7 +39,7 @@ type Thumb struct {
 	img_name       string
 }
 
-func NewThumb(img_width int, img_height int, thumb_width int, thumb_height int, img_name string) Image {
+func NewThumb(img_width int, img_height int, thumb_width int, thumb_height int, img_name string) Img {
 	return &Thumb{
 		width:          img_width,
 		height:         img_height,
@@ -46,12 +49,41 @@ func NewThumb(img_width int, img_height int, thumb_width int, thumb_height int, 
 	}
 }
 
+func (t *Thumb) DecodeIt() (image.Image, error) {
+	// implementare gestione degli errori
+	img_file, err := os.Open(t.img_name)
+	defer img_file.Close()
+	if err != nil {
+		// the image can not be opened, custom error
+		return nil, err
+	}
+	img, _, err := image.Decode(img_file)
+	if err != nil {
+		// the image can not be decoded, custom error
+		return nil, err
+	}
+	return img, nil
+}
+
+func (t *Thumb) GetFormatFromExtension() (error, string) {
+	return nil, "jpeg"
+}
+
 func (t *Thumb) CurrentWidth() int {
 	return t.width
 }
 
 func (t *Thumb) CurrentHeight() int {
 	return t.height
+}
+
+func (t *Thumb) forceToJpg(w io.Writer, r io.Reader) error {
+	// custom error, the image can not be converted to jpg
+	img, _, err := image.Decode(r)
+	if err != nil {
+		return err
+	}
+	return jpeg.Encode(w, img, nil)
 }
 
 // decodificare sempre in jpg

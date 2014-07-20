@@ -6,10 +6,11 @@ import (
 	"image"
 	_ "image/color"
 	"image/jpeg"
+	"image/png"
 	"os"
 )
 
-func createImage(name string) (bool, error) {
+func createImage(name string, format string) (bool, error) {
 	m := image.NewRGBA(image.Rect(0, 0, 120, 90))
 
 	out, err := os.Create(name)
@@ -17,8 +18,12 @@ func createImage(name string) (bool, error) {
 		panic(fmt.Sprintf("is not possible to create the file %s necessary for testing", name))
 	}
 	defer out.Close()
-
-	jpeg.Encode(out, m, nil)
+	switch format {
+	case "jpeg":
+		jpeg.Encode(out, m, nil)
+	case "png":
+		png.Encode(out, m)
+	}
 	return true, err
 }
 

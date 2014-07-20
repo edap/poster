@@ -12,6 +12,10 @@ import (
 	"testing"
 )
 
+// func TestForceToJpg(t *testing.T) {
+// 	Convey("When a given image is not")
+// }
+
 func TestHasDesiredDimension(t *testing.T) {
 	Convey("Check if an image has the same desired dimension", t, func() {
 		//default_thumb, _ := openThumb("test_images/120x90.jpg")

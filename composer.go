@@ -44,18 +44,7 @@ func CalcPrimeFactors(number_to_factorize int) []int {
 	return rv
 }
 
-// func GetBaseAndHeight(prime_factors []int) (bool, []int) {
-// 	if len(prime_factors) == 1 {
-// 		return false, prime_factors
-// 		// } else if len(prime_factors) == 2{
-// 	} else {
-// 		return true, prime_factors
-// 	}
-// }
-
-//aggiungere aspect ratio?
-// 16/9 = 1.777777777777777
-// 4/3 = 1.3333333333333
+// Given a list of the prime factors
 func GetBaseAndHeight(prime_factors []int) (bool, int, int) {
 	if len(prime_factors) == 1 {
 		return false, prime_factors[0], prime_factors[0]
@@ -89,7 +78,7 @@ func CalculateRectangle(rct map[string]int) map[string]int {
 	//aspect_ratio := 1.3333333333333
 	is_square, side := IsASquare(rct["area"])
 	if is_square {
-		rct["area"], rct["height"], rct["base"], rct["skipped"] = rct["area"], int(side), int(side), rct["skipped"]
+		rct["height"], rct["base"] = int(side), int(side)
 	} else {
 		factors := CalcPrimeFactors(rct["area"])
 		founded, base, height := GetBaseAndHeight(factors)
@@ -103,12 +92,15 @@ func CalculateRectangle(rct map[string]int) map[string]int {
 	return rct
 }
 
+// Check if a number is a square number, return the side
 func IsASquare(number_to_square int) (bool, float64) {
 	side := math.Sqrt(float64(number_to_square))
 	side_without_decimals := float64(int(side))
 	return ((side - side_without_decimals) == 0), side
 }
 
+// Given the dimension of the rectangle and the images, it calculates the exact postion of the images in the final
+// rectangle
 func CalculatePositions(rect map[string]int, images []string, thumb_width int, thumb_height int) map[string][2]int {
 	x, y := 0, 0
 	res := make(map[string][2]int)
