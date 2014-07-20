@@ -21,13 +21,15 @@ func (a *wrongArgumentError) Error() string {
 }
 
 type Img interface {
-	HasDesiredDimension() (bool, error)
-	CurrentWidth() int
-	CurrentHeight() int
+	HasDesiredDimension() bool
+	Height() int
+	Width() int
+	SetHeight(h int)
+	SetWidth(w int)
+	SetDimension() error
 	GetFormatFromExtension() (error, string)
 	Move(src_path, dst_path string) error
 	Copy(src_path, dst_path string) (int64, error)
-	Scale(img_path string) error
 	DecodeIt() (image.Image, error)
 }
 
@@ -39,14 +41,31 @@ type Thumb struct {
 	img_name       string
 }
 
-func NewThumb(img_width int, img_height int, thumb_width int, thumb_height int, img_name string) Img {
+//func NewThumb(img_width int, img_height int, thumb_width int, thumb_height int, img_name string) Img {
+func NewThumb(thumb_width int, thumb_height int, img_name string) Img {
 	return &Thumb{
-		width:          img_width,
-		height:         img_height,
 		desired_width:  thumb_width,
 		desired_height: thumb_height,
 		img_name:       img_name,
 	}
+}
+
+func (t *Thumb) SetDimension() error {
+	img_file, err := os.Open(t.img_name)
+	defer img_file.Close()
+	if err != nil {
+		log.Printf("the image can not be opened: %v", err)
+		return err
+	}
+	config, _, err := image.DecodeConfig(img_file)
+	if err != nil {
+		log.Printf("the image %s can not be decoded: %v", t.img_name, err)
+		return err
+	}
+	t.SetHeight(config.Height)
+	t.SetWidth(config.Width)
+
+	return err
 }
 
 func (t *Thumb) DecodeIt() (image.Image, error) {
@@ -54,27 +73,42 @@ func (t *Thumb) DecodeIt() (image.Image, error) {
 	img_file, err := os.Open(t.img_name)
 	defer img_file.Close()
 	if err != nil {
-		// the image can not be opened, custom error
+		log.Printf("the image can not be opened: %v", err)
 		return nil, err
 	}
+
 	img, _, err := image.Decode(img_file)
 	if err != nil {
-		// the image can not be decoded, custom error
+		log.Printf("that image can not be decoded: %v", err)
 		return nil, err
 	}
-	return img, nil
+
+	if t.HasDesiredDimension() {
+		return img, nil
+	} else {
+		m := resize.Resize(uint(t.desired_width), uint(t.desired_height), img, resize.NearestNeighbor)
+		return m, nil
+	}
 }
 
 func (t *Thumb) GetFormatFromExtension() (error, string) {
 	return nil, "jpeg"
 }
 
-func (t *Thumb) CurrentWidth() int {
+func (t *Thumb) Width() int {
 	return t.width
 }
 
-func (t *Thumb) CurrentHeight() int {
+func (t *Thumb) Height() int {
 	return t.height
+}
+
+func (t *Thumb) SetWidth(width int) {
+	t.width = width
+}
+
+func (t *Thumb) SetHeight(height int) {
+	t.height = height
 }
 
 func (t *Thumb) forceToJpg(w io.Writer, r io.Reader) error {
@@ -95,36 +129,6 @@ func (t *Thumb) forceToJpg(w io.Writer, r io.Reader) error {
 //  }
 //  return png.Encode(w, img)
 // }
-
-func (t *Thumb) Scale(img_path string) error {
-	are_equal, err := t.HasDesiredDimension()
-	if err != nil {
-		return err
-	}
-	if are_equal == true {
-		return nil
-	}
-
-	file, err := os.Open(img_path)
-	if err != nil {
-		return err
-	}
-
-	img, err := jpeg.Decode(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	file.Close()
-
-	m := resize.Resize(uint(t.desired_width), uint(t.desired_height), img, resize.NearestNeighbor)
-	out, err := os.Create(img_path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer out.Close()
-
-	return jpeg.Encode(out, m, nil)
-}
 
 func (t *Thumb) Copy(src_path, dst_path string) (int64, error) {
 	src_file, err := os.Open(src_path)
@@ -153,17 +157,10 @@ func (t *Thumb) Move(src_path, dst_path string) error {
 	return os.Rename(src_path, dst_path)
 }
 
-func (t *Thumb) HasDesiredDimension() (bool, error) {
-	if t.desired_height < 1 {
-		return false, &wrongArgumentError{"thumb_height"}
-	}
-	if t.desired_width < 1 {
-		return false, &wrongArgumentError{"thumb_width"}
-	}
-
+func (t *Thumb) HasDesiredDimension() bool {
 	if t.desired_width == t.width && t.desired_height == t.height {
-		return true, nil
+		return true
 	} else {
-		return false, nil
+		return false
 	}
 }

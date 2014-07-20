@@ -2,13 +2,13 @@ package main
 
 import (
 	_ "errors"
-	//"fmt"
+	"fmt"
 	_ "github.com/nfnt/resize"
 	. "github.com/smartystreets/goconvey/convey"
 	//"image"
 	_ "image/color"
-	//"image/jpeg"
-	//"os"
+	"image/jpeg"
+	"os"
 	"testing"
 )
 
@@ -27,7 +27,7 @@ func TestHasDesiredDimension(t *testing.T) {
 				desired_width:  10,
 				desired_height: 20,
 			}
-			result, _ := thumb.HasDesiredDimension()
+			result := thumb.HasDesiredDimension()
 			So(result, ShouldBeFalse)
 		})
 
@@ -38,77 +38,58 @@ func TestHasDesiredDimension(t *testing.T) {
 				desired_width:  120,
 				desired_height: 90,
 			}
-			result, _ := thumb.HasDesiredDimension()
+			result := thumb.HasDesiredDimension()
 			So(result, ShouldBeTrue)
 		})
 
 	})
 }
 
-func TestCopy(t *testing.T) {
-	Convey("Check if copy file between folders works", t, func() {
-		thumb := &Thumb{}
-		_, err := thumb.Copy("test_images/120x90.jpg", "test_images/120x90copy.jpg")
-		So(err, ShouldBeNil)
-	})
-}
+// not used
+// func TestCopy(t *testing.T) {
+// 	Convey("Check if copy file between folders works", t, func() {
+// 		thumb := &Thumb{}
+// 		_, err := thumb.Copy("test_images/120x90.jpg", "test_images/120x90copy.jpg")
+// 		So(err, ShouldBeNil)
+// 	})
+// }
 
-func TestMove(t *testing.T) {
-	Convey("Check if move files works", t, func() {
-		thumb := &Thumb{}
-		err := thumb.Move("test_images/120x90copy.jpg", "test_images/120x90moved.jpg")
-		So(err, ShouldBeNil)
-	})
-}
+// func TestMove(t *testing.T) {
+// 	Convey("Check if move files works", t, func() {
+// 		thumb := &Thumb{}
+// 		err := thumb.Move("test_images/120x90copy.jpg", "test_images/120x90moved.jpg")
+// 		So(err, ShouldBeNil)
+// 	})
+// }
 
-func TestScale(t *testing.T) {
-	Convey("Check if an image has the same desired dimension", t, func() {
-		Convey("if the given dimensions are the same as the image dimension, return true", func() {
-			_, err := openThumb("test_images/120x90.jpg")
-			if err != nil {
-				panic("impossible to open test image")
-			}
+func TestDecodeIt(t *testing.T) {
+	Convey("Open an image and decode it", t, func() {
+		original_img := "test_images/120x90.jpg"
+		final_img := "test_images/decode.jpg"
+		Convey("if the desired dimensions are different as the original one, scale it", func() {
 			thumb := &Thumb{
-				width:          120,
-				height:         90,
-				desired_width:  220,
-				desired_height: 190,
+				img_name:       original_img,
+				desired_width:  20,
+				desired_height: 10,
 			}
-			er := thumb.Scale("test_images/120x90.jpg")
-
+			img, er := thumb.DecodeIt()
 			So(er, ShouldBeNil)
+
+			out, err := os.Create(final_img)
+			if err != nil {
+				panic(fmt.Sprintf("is not possible to create the file %s necessary for testing", final_img))
+			}
+			defer out.Close()
+			jpeg.Encode(out, img, nil)
+
+			final_file, err := os.Open(final_img)
+			if err != nil {
+				fmt.Println(err)
+			}
+			config, _ := jpeg.DecodeConfig(final_file)
+			So(config.Width, ShouldEqual, 20)
+			So(config.Height, ShouldEqual, 10)
+
 		})
 	})
 }
-
-// Convey("When one of the given param is < than 1", t, func() {
-//  Convey("return a wrongArgumentError", func() {
-//    _, err := HasDesiredDimension(120, 0, 120, 90)
-//    w := new(wrongArgumentError)
-//    So(err, ShouldHaveSameTypeAs, w)
-//  })
-//  Convey("give a significant message", func() {
-//    _, err := HasDesiredDimension(120, 0, 120, 90)
-//    So(err.Error(), ShouldEqual, "The argument thumb_height can not be minor than 1")
-//  })
-// })
-
-// vedere qui http://golangtutorials.blogspot.de/2011/06/memory-variables-in-memory-and-pointers.html
-// per l'errore cannot take the address of "test_image"
-// Convey("if the given dimensions are the same as the image dimension, return true", func() {
-//  source_dir = &"test_image"
-//  target_dir = &"merged/test_image"
-//  thumb := &Thumb{
-//    width:          120,
-//    height:         90,
-//    desired_width:  300,
-//    desired_height: 100,
-//  }
-//  result, _ := createImage("test_image/a_big_one.jpg")
-//  thumb.ScaleThumb()
-//  So(result, ShouldBeTrue)
-// })
-
-// func TestScaleThumb(t *testing.T) {
-
-// }

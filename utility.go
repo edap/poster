@@ -11,11 +11,12 @@ import (
 )
 
 func isImage(filename string) bool {
+	// Only Jpg support for now
+	//is_img, _ := regexp.MatchString("(?i)\\.(jpg|jpeg)$", filename)
 	is_img, _ := regexp.MatchString("(?i)\\.(png|jpg|jpeg|gif)$", filename)
 	return is_img
 }
 
-// implementare log, o almeno, avere una politica coerente sugli errori
 func listFiles(source_dir string) (int, []string) {
 	dirname := source_dir
 	d, err := os.Open(dirname)
@@ -57,6 +58,7 @@ func createDirectory(path string) error {
 		return fmt.Errorf("there is already a file called %g ", path)
 	}
 	if finfo.IsDir() {
+		// if file, err := os.Open(img_path); err == nil {
 		err := isWritableByTheUser(finfo, path)
 		if err != nil {
 			return err

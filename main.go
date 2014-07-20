@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	//"fmt"
 	"image"
 	"image/draw"
 	"image/jpeg"
@@ -17,7 +17,9 @@ func main() {
 		thumb_height = flag.Int("thumb_height", 90, "the height of a single thumb")
 		source_dir   = flag.String("source_dir", ".", "the origin directory that contains the images to compose the grid")
 		dest_dir     = flag.String("dest_dir", ".", "the destination directory that will contain the grid")
-		log_file     = flag.String("log_file", "stdout", "specify a log file, as default it will print on stdout")
+		//source_dir = flag.String("source_dir", "/home/da/to_merge", "the origin directory that contains the images to compose the grid")
+		//dest_dir   = flag.String("dest_dir", "/home/da/to_merge", "the destination directory that will contain the grid")
+		log_file = flag.String("log_file", "stdout", "specify a log file, as default it will print on stdout")
 	)
 	flag.Parse()
 
@@ -48,28 +50,29 @@ func main() {
 	rect := CalculateRectangle(res)
 	log.Printf("%d images will be skipped", res["skipped"])
 	log.Printf("%d images will be merged together", res["area"])
+
 	// calculate the position of each image in the final canvas
 	positions := CalculatePositions(rect, images, *thumb_width, *thumb_height)
 
 	// give a name to the canvas file
-	//filepath.Join(source_dir, fi.Name()
-	canvas_file := filepath.Join(*dest_dir, "/"+randStr(20)+".jpg")
-	// create the destination file
-	back := image.NewRGBA(image.Rect(0, 0, *thumb_width*res["base"], *thumb_height*res["height"]))
-	fmt.Println(canvas_file)
+	canvas_filename := filepath.Join(*dest_dir, randStr(20)+".jpg")
+	canvas_image := image.NewRGBA(image.Rect(0, 0, *thumb_width*res["base"], *thumb_height*res["height"]))
 
 	// iterate through the images, resize if necessary, decode and add to the canvas
 	for _, value := range images {
 		// altezza e larghezza attuali dell'immagine, possono essere ricavati dopo, nella thumb
 		thumb := NewThumb(
-			120,
-			90,
+			// 120,
+			// 90,
 			*thumb_width,
 			*thumb_height,
 			value,
 		)
 		// SEI ARRIVATO QUI:
 		// unit test su questa funzione, che deve ritornare il tipo di immagine
+		thumb.SetDimension()
+		log.Print(thumb.Width())
+		log.Print(thumb.Height())
 		thumb.GetFormatFromExtension()
 		// se e' png forza a jpg. Se e' troppo complicato, lavoriamo solo con jpg all'inizio
 		// mettere la cartella corrente come default, fare qualche prova
@@ -84,13 +87,13 @@ func main() {
 		}
 		x := positions[value][0]
 		y := positions[value][1]
-		draw.Draw(back, back.Bounds(), img, image.Point{x, y}, draw.Src)
+		draw.Draw(canvas_image, canvas_image.Bounds(), img, image.Point{x, y}, draw.Src)
 	}
-	toimg, _ := os.Create(canvas_file)
+	toimg, _ := os.Create(canvas_filename)
 	defer toimg.Close()
-	jpeg.Encode(toimg, back, &jpeg.Options{jpeg.DefaultQuality})
+	jpeg.Encode(toimg, canvas_image, &jpeg.Options{jpeg.DefaultQuality})
 
-	log.Printf("canvas %s succesfully created", canvas_file)
+	log.Printf("canvas %s succesfully created", canvas_filename)
 }
 
 //DA FARE
