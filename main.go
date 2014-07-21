@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	//"fmt"
 	"image"
 	"image/draw"
 	"image/jpeg"
@@ -59,35 +58,23 @@ func main() {
 	canvas_image := image.NewRGBA(image.Rect(0, 0, *thumb_width*res["base"], *thumb_height*res["height"]))
 
 	// iterate through the images, resize if necessary, decode and add to the canvas
-	for _, value := range images {
-		// altezza e larghezza attuali dell'immagine, possono essere ricavati dopo, nella thumb
+	for _, image_path := range images {
 		thumb := NewThumb(
-			// 120,
-			// 90,
 			*thumb_width,
 			*thumb_height,
-			value,
+			image_path,
 		)
-		// SEI ARRIVATO QUI:
-		// unit test su questa funzione, che deve ritornare il tipo di immagine
 		thumb.SetDimension()
-		log.Print(thumb.Width())
-		log.Print(thumb.Height())
 		thumb.GetFormatFromExtension()
-		// se e' png forza a jpg. Se e' troppo complicato, lavoriamo solo con jpg all'inizio
-		// mettere la cartella corrente come default, fare qualche prova
 		img, err := thumb.DecodeIt()
 
-		// img_file, _ := os.Open(value)
-		// defer img_file.Close()
-		// img, _, _ := image.Decode(img_file)
-
 		if err != nil {
-			log.Printf("it was not possible to decode the image:", err)
+			log.Printf("it was not possible to decode the image %s: %v", image_path, err)
+		} else {
+			x := positions[image_path][0]
+			y := positions[image_path][1]
+			draw.Draw(canvas_image, canvas_image.Bounds(), img, image.Point{x, y}, draw.Src)
 		}
-		x := positions[value][0]
-		y := positions[value][1]
-		draw.Draw(canvas_image, canvas_image.Bounds(), img, image.Point{x, y}, draw.Src)
 	}
 	toimg, _ := os.Create(canvas_filename)
 	defer toimg.Close()

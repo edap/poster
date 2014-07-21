@@ -10,8 +10,8 @@ import (
 	"os"
 )
 
-func createImage(name string, format string) (bool, error) {
-	m := image.NewRGBA(image.Rect(0, 0, 120, 90))
+func createImage(name string, format string, width int, height int) (bool, error) {
+	m := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	out, err := os.Create(name)
 	if err != nil {

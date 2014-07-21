@@ -12,13 +12,8 @@ import (
 	"testing"
 )
 
-// func TestForceToJpg(t *testing.T) {
-// 	Convey("When a given image is not")
-// }
-
 func TestHasDesiredDimension(t *testing.T) {
 	Convey("Check if an image has the same desired dimension", t, func() {
-		//default_thumb, _ := openThumb("test_images/120x90.jpg")
 
 		Convey("if the given dimensions are different from the image dimension, return false", func() {
 			thumb := &Thumb{
@@ -44,23 +39,6 @@ func TestHasDesiredDimension(t *testing.T) {
 
 	})
 }
-
-// not used
-// func TestCopy(t *testing.T) {
-// 	Convey("Check if copy file between folders works", t, func() {
-// 		thumb := &Thumb{}
-// 		_, err := thumb.Copy("test_images/120x90.jpg", "test_images/120x90copy.jpg")
-// 		So(err, ShouldBeNil)
-// 	})
-// }
-
-// func TestMove(t *testing.T) {
-// 	Convey("Check if move files works", t, func() {
-// 		thumb := &Thumb{}
-// 		err := thumb.Move("test_images/120x90copy.jpg", "test_images/120x90moved.jpg")
-// 		So(err, ShouldBeNil)
-// 	})
-// }
 
 func TestDecodeIt(t *testing.T) {
 	Convey("Open an image and decode it", t, func() {
@@ -93,3 +71,10 @@ func TestDecodeIt(t *testing.T) {
 		})
 	})
 }
+
+// func TestSetDimension(t *testing.T){
+// 	Convey("read the dimension of an image and set width and height"){
+
+// 	}
+
+// }

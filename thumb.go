@@ -1,24 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"github.com/nfnt/resize"
 	"image"
 	"image/jpeg"
 	"io"
 	"log"
 	"os"
-	//"path/filepath"
-	//errors
 )
-
-// questo sparira' non ha senso dire che 0 e' un error, quando di default, il pacchetto resize diche che se
-// h o w sono 0, scala l'immagine in proporzione
-type wrongArgumentError struct{ arg string }
-
-func (a *wrongArgumentError) Error() string {
-	return fmt.Sprintf("The argument %s can not be minor than 1", a.arg)
-}
 
 type Img interface {
 	HasDesiredDimension() bool
@@ -28,8 +17,6 @@ type Img interface {
 	SetWidth(w int)
 	SetDimension() error
 	GetFormatFromExtension() (error, string)
-	Move(src_path, dst_path string) error
-	Copy(src_path, dst_path string) (int64, error)
 	DecodeIt() (image.Image, error)
 }
 
@@ -69,7 +56,6 @@ func (t *Thumb) SetDimension() error {
 }
 
 func (t *Thumb) DecodeIt() (image.Image, error) {
-	// implementare gestione degli errori
 	img_file, err := os.Open(t.img_name)
 	defer img_file.Close()
 	if err != nil {
@@ -129,33 +115,6 @@ func (t *Thumb) forceToJpg(w io.Writer, r io.Reader) error {
 //  }
 //  return png.Encode(w, img)
 // }
-
-func (t *Thumb) Copy(src_path, dst_path string) (int64, error) {
-	src_file, err := os.Open(src_path)
-	if err != nil {
-		return 0, err
-	}
-	defer src_file.Close()
-
-	src_file_stat, err := src_file.Stat()
-	if err != nil {
-		return 0, err
-	}
-	if !src_file_stat.Mode().IsRegular() {
-		return 0, fmt.Errorf("%s is not a regular file", src_path)
-	}
-
-	dst_file, err := os.Create(dst_path)
-	if err != nil {
-		return 0, err
-	}
-	defer dst_file.Close()
-	return io.Copy(dst_file, src_file)
-}
-
-func (t *Thumb) Move(src_path, dst_path string) error {
-	return os.Rename(src_path, dst_path)
-}
 
 func (t *Thumb) HasDesiredDimension() bool {
 	if t.desired_width == t.width && t.desired_height == t.height {
