@@ -1,10 +1,8 @@
 package main
 
 import (
-	_ "errors"
 	"fmt"
 	"image"
-	_ "image/color"
 	"image/jpeg"
 	"image/png"
 	"os"

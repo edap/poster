@@ -3,8 +3,6 @@ package main
 import (
 	"github.com/nfnt/resize"
 	"image"
-	"image/jpeg"
-	"io"
 	"log"
 	"os"
 )
@@ -16,7 +14,6 @@ type Img interface {
 	SetHeight(h int)
 	SetWidth(w int)
 	SetDimension() error
-	GetFormatFromExtension() (error, string)
 	DecodeIt() (image.Image, error)
 }
 
@@ -28,7 +25,7 @@ type Thumb struct {
 	img_name       string
 }
 
-//func NewThumb(img_width int, img_height int, thumb_width int, thumb_height int, img_name string) Img {
+//NewThumb return a new Thumb struct that satisfy the Img interface{
 func NewThumb(thumb_width int, thumb_height int, img_name string) Img {
 	return &Thumb{
 		desired_width:  thumb_width,
@@ -37,6 +34,8 @@ func NewThumb(thumb_width int, thumb_height int, img_name string) Img {
 	}
 }
 
+// SetDimension call image.Decodeconfig to read the real dimension of the image
+// and set Thumb.widht and Thumb.height
 func (t *Thumb) SetDimension() error {
 	img_file, err := os.Open(t.img_name)
 	defer img_file.Close()
@@ -55,6 +54,7 @@ func (t *Thumb) SetDimension() error {
 	return err
 }
 
+// DecodeIt open the image,  resize it if necessary, call image.Decode and return an image.Image interface
 func (t *Thumb) DecodeIt() (image.Image, error) {
 	img_file, err := os.Open(t.img_name)
 	defer img_file.Close()
@@ -77,10 +77,6 @@ func (t *Thumb) DecodeIt() (image.Image, error) {
 	}
 }
 
-func (t *Thumb) GetFormatFromExtension() (error, string) {
-	return nil, "jpeg"
-}
-
 func (t *Thumb) Width() int {
 	return t.width
 }
@@ -97,25 +93,7 @@ func (t *Thumb) SetHeight(height int) {
 	t.height = height
 }
 
-func (t *Thumb) forceToJpg(w io.Writer, r io.Reader) error {
-	// custom error, the image can not be converted to jpg
-	img, _, err := image.Decode(r)
-	if err != nil {
-		return err
-	}
-	return jpeg.Encode(w, img, nil)
-}
-
-// decodificare sempre in jpg
-// convertToPNG converts from any recognized format to PNG.
-// func convertToPNG(w io.Writer, r io.Reader) error {
-//  img, _, err := image.Decode(r)
-//  if err != nil {
-//   return err
-//  }
-//  return png.Encode(w, img)
-// }
-
+// HasDesiredDimension returns true if the real dimension of the thumb are equals to the desidered one
 func (t *Thumb) HasDesiredDimension() bool {
 	if t.desired_width == t.width && t.desired_height == t.height {
 		return true

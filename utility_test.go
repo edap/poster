@@ -35,3 +35,16 @@ func TestIsImage(t *testing.T) {
 		})
 	})
 }
+
+func TestIsJpeg(t *testing.T) {
+	Convey("Given a name file", t, func() {
+		Convey("return true if the extension is a jpg extension", func() {
+			So(isJpeg("image.jpg"), ShouldBeTrue)
+		})
+
+		Convey("return false if the extension is not a jpg", func() {
+			So(isJpeg("text.doc"), ShouldBeFalse)
+			So(isJpeg("image.png"), ShouldBeFalse)
+		})
+	})
+}

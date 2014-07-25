@@ -1,12 +1,8 @@
 package main
 
 import (
-	_ "errors"
 	"fmt"
-	_ "github.com/nfnt/resize"
 	. "github.com/smartystreets/goconvey/convey"
-	//"image"
-	_ "image/color"
 	"image/jpeg"
 	"os"
 	"testing"

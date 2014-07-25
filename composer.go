@@ -4,10 +4,9 @@ import (
 	"math"
 )
 
-// Generate numbers until the limit max.
-// after the 2, all the prime numbers are odd
-// Send a channel signal when the limit is reached
-func Generate(max int, ch chan<- int) {
+// generate is a function that produces odd numbers until the limit max.
+// It send a channel signal when the limit is reached
+func generate(max int, ch chan<- int) {
 	ch <- 2
 	for i := 3; i <= max; i += 2 {
 		ch <- i
@@ -15,9 +14,9 @@ func Generate(max int, ch chan<- int) {
 	ch <- -1 // signal che abbiamo finito
 }
 
-// Copy the values from channel 'in' to channel 'out',
+// filter is a function that copies the values from channel 'in' to channel 'out',
 // removing those divisible by 'prime'.
-func Filter(in <-chan int, out chan<- int, prime int) {
+func filter(in <-chan int, out chan<- int, prime int) {
 	for i := <-in; i != -1; i = <-in {
 		if i%prime != 0 {
 			out <- i
@@ -26,26 +25,27 @@ func Filter(in <-chan int, out chan<- int, prime int) {
 	out <- -1
 }
 
-// Prime factorization derived from slightly modified version of
+// calcPrimeFactors return the prime factors of a number. It is derived from a slightly modified version of
 // sieve.go in Go source distribution.
-func CalcPrimeFactors(number_to_factorize int) []int {
+func calcPrimeFactors(number_to_factorize int) []int {
 	rv := []int{}
 	ch := make(chan int)                 // Create a new channel.
-	go Generate(number_to_factorize, ch) // Start Generate() as goroutine.
+	go generate(number_to_factorize, ch) // Start generate() as goroutine.
 	for prime := <-ch; (prime != -1) && (number_to_factorize > 1); prime = <-ch {
 		for number_to_factorize%prime == 0 {
 			number_to_factorize = number_to_factorize / prime
 			rv = append(rv, prime)
 		}
 		ch1 := make(chan int)
-		go Filter(ch, ch1, prime)
+		go filter(ch, ch1, prime)
 		ch = ch1
 	}
 	return rv
 }
 
-// Given a list of the prime factors
-func GetBaseAndHeight(prime_factors []int) (bool, int, int) {
+// getBaseAndHeight takes as argument the an array containing the prime factors of a number
+// and gives back widht and height of the rectangle
+func getBaseAndHeight(prime_factors []int) (bool, int, int) {
 	if len(prime_factors) == 1 {
 		return false, prime_factors[0], prime_factors[0]
 	} else if len(prime_factors) == 2 {
@@ -69,39 +69,38 @@ func GetBaseAndHeight(prime_factors []int) (bool, int, int) {
 	}
 }
 
-//oppure due routine, una che parte a destra dell'array di integers e una che parte a sinistra, si scambiano continuamente
-// il chan che dice a quanto sta il loro prodotto e quando la routinche che calcola l'altezza arriva ad un momento
-// in cui il suo totale/il_totale_della base assomiglia all'aspect ratio si ferma.
-
-func CalculateRectangle(rct map[string]int) map[string]int {
-	//check se area e' un int
-	//aspect_ratio := 1.3333333333333
-	is_square, side := IsASquare(rct["area"])
+// calculateRectangle takes as parameter the an integer, that is the total of images that should
+// compose the rectangle. If the number is a square number, the method return the side of the square as base
+// and height, skipping the calculation. If it's not, the function calls itself recursively, removing one element each time
+// is not possible to find out a rectangle
+func calculateRectangle(rct map[string]int) map[string]int {
+	is_square, side := isASquare(rct["area"])
 	if is_square {
 		rct["height"], rct["base"] = int(side), int(side)
 	} else {
-		factors := CalcPrimeFactors(rct["area"])
-		founded, base, height := GetBaseAndHeight(factors)
+		factors := calcPrimeFactors(rct["area"])
+		founded, base, height := getBaseAndHeight(factors)
 		rct["base"], rct["height"] = base, height
 		if founded == false {
 			rct["area"] = rct["area"] - 1
 			rct["skipped"] = rct["skipped"] + 1
-			CalculateRectangle(rct)
+			calculateRectangle(rct)
 		}
 	}
 	return rct
 }
 
-// Check if a number is a square number, return the side
-func IsASquare(number_to_square int) (bool, float64) {
+// isASquale check if a number is a square number, return the side
+func isASquare(number_to_square int) (bool, float64) {
 	side := math.Sqrt(float64(number_to_square))
 	side_without_decimals := float64(int(side))
 	return ((side - side_without_decimals) == 0), side
 }
 
-// Given the dimension of the rectangle and the images, it calculates the exact postion of the images in the final
+// calculatePositions takes as parameter the dimension of the desidered thumb that will compose the rectangle
+// and the list of images to merge. It calculates the exact postion of each image in the final
 // rectangle
-func CalculatePositions(rect map[string]int, images []string, thumb_width int, thumb_height int) map[string][2]int {
+func calculatePositions(rect map[string]int, images []string, thumb_width int, thumb_height int) map[string][2]int {
 	x, y := 0, 0
 	res := make(map[string][2]int)
 	for index, value := range images {

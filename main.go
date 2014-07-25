@@ -14,11 +14,11 @@ func main() {
 	var (
 		thumb_width  = flag.Int("thumb_width", 120, "the width of a single thumb")
 		thumb_height = flag.Int("thumb_height", 90, "the height of a single thumb")
-		source_dir   = flag.String("source_dir", ".", "the origin directory that contains the images to compose the grid")
-		dest_dir     = flag.String("dest_dir", ".", "the destination directory that will contain the grid")
-		//source_dir = flag.String("source_dir", "/home/da/to_merge", "the origin directory that contains the images to compose the grid")
-		//dest_dir   = flag.String("dest_dir", "/home/da/to_merge", "the destination directory that will contain the grid")
-		log_file = flag.String("log_file", "stdout", "specify a log file, as default it will print on stdout")
+		// source_dir   = flag.String("source_dir", ".", "the origin directory that contains the images to compose the grid")
+		// dest_dir     = flag.String("dest_dir", ".", "the destination directory that will contain the grid")
+		source_dir = flag.String("source_dir", "/home/da/to_merge", "the origin directory that contains the images to compose the grid")
+		dest_dir   = flag.String("dest_dir", "/home/da/to_merge", "the destination directory that will contain the grid")
+		log_file   = flag.String("log_file", "stdout", "specify a log file, as default it will print on stdout")
 	)
 	flag.Parse()
 
@@ -32,7 +32,7 @@ func main() {
 		log.SetOutput(f)
 	}
 
-	// be sure that at least 2 images are present
+	// At least 2 images has to be in the folder present
 	tot, images := listFiles(*source_dir)
 	if tot < 2 {
 		log.Fatal("There are less than two images in this folder")
@@ -46,14 +46,14 @@ func main() {
 
 	//calculate the dimension of the rectangle
 	res := map[string]int{"area": tot, "height": 0, "base": 0, "skipped": 0}
-	rect := CalculateRectangle(res)
+	rect := calculateRectangle(res)
 	log.Printf("%d images will be skipped", res["skipped"])
 	log.Printf("%d images will be merged together", res["area"])
 
 	// calculate the position of each image in the final canvas
-	positions := CalculatePositions(rect, images, *thumb_width, *thumb_height)
+	positions := calculatePositions(rect, images, *thumb_width, *thumb_height)
 
-	// give a name to the canvas file
+	// give a name to the canvas file and prepare it
 	canvas_filename := filepath.Join(*dest_dir, randStr(20)+".jpg")
 	canvas_image := image.NewRGBA(image.Rect(0, 0, *thumb_width*res["base"], *thumb_height*res["height"]))
 
@@ -65,7 +65,6 @@ func main() {
 			image_path,
 		)
 		thumb.SetDimension()
-		thumb.GetFormatFromExtension()
 		img, err := thumb.DecodeIt()
 
 		if err != nil {
@@ -82,11 +81,3 @@ func main() {
 
 	log.Printf("canvas %s succesfully created", canvas_filename)
 }
-
-//DA FARE
-// creare il test per listFiles
-// far si che count files diventi count images chiama la conversione a jpg (o converta tutto a jpg)
-// visto che ha i bytes, potrebbe dare un messaggio interessante durante il procedimento
-// se non ci sono immagini, countImages mi dice di dargli una cartella con le immagini, e mi fa una faccina buffa
-// log, cosa succede se lancio il programma in una cartella con solo txt files?
-// prompt interattivo che mi dice: ci impiegherai circa x sec. Vuoi continuare. Oppure senza prompt

@@ -11,10 +11,13 @@ import (
 )
 
 func isImage(filename string) bool {
-	// Only Jpg support for now
-	//is_img, _ := regexp.MatchString("(?i)\\.(jpg|jpeg)$", filename)
 	is_img, _ := regexp.MatchString("(?i)\\.(png|jpg|jpeg|gif)$", filename)
 	return is_img
+}
+
+func isJpeg(filename string) bool {
+	is_jpeg, _ := regexp.MatchString("(?i)\\.(jpg|jpeg)$", filename)
+	return is_jpeg
 }
 
 func listFiles(source_dir string) (int, []string) {
@@ -31,7 +34,9 @@ func listFiles(source_dir string) (int, []string) {
 	tot := 0
 	files := []string{}
 	for _, fi := range fi {
-		if fi.Mode().IsRegular() && isImage(fi.Name()) {
+		if fi.Mode().IsRegular() && isJpeg(fi.Name()) {
+			// image conversion still to implement
+			//if fi.Mode().IsRegular() && isImage(fi.Name()) {
 			tot += 1
 			files = append(files, filepath.Join(source_dir, fi.Name()))
 			//fmt.Println(fi.Name(), fi.Size(), "bytes")
