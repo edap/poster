@@ -68,9 +68,14 @@ func TestDecodeIt(t *testing.T) {
 	})
 }
 
-// func TestSetDimension(t *testing.T){
-// 	Convey("read the dimension of an image and set width and height"){
-
-// 	}
-
-// }
+func TestSetDimension(t *testing.T) {
+	Convey("set dimension of an image", t, func() {
+		original_img := "test_images/120x90.jpg"
+		thumb := &Thumb{
+			img_name: original_img,
+		}
+		thumb.SetDimension()
+		So(thumb.width, ShouldEqual, 120)
+		So(thumb.height, ShouldEqual, 90)
+	})
+}

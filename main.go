@@ -14,11 +14,9 @@ func main() {
 	var (
 		thumb_width  = flag.Int("thumb_width", 120, "the width of a single thumb")
 		thumb_height = flag.Int("thumb_height", 90, "the height of a single thumb")
-		// source_dir   = flag.String("source_dir", ".", "the origin directory that contains the images to compose the grid")
-		// dest_dir     = flag.String("dest_dir", ".", "the destination directory that will contain the grid")
-		source_dir = flag.String("source_dir", "/home/da/to_merge", "the origin directory that contains the images to compose the grid")
-		dest_dir   = flag.String("dest_dir", "/home/da/to_merge", "the destination directory that will contain the grid")
-		log_file   = flag.String("log_file", "stdout", "specify a log file, as default it will print on stdout")
+		source_dir   = flag.String("source_dir", ".", "the origin directory that contains the images to compose the grid")
+		dest_dir     = flag.String("dest_dir", ".", "the destination directory that will contain the grid")
+		log_file     = flag.String("log_file", "stdout", "specify a log file, as default it will print on stdout")
 	)
 	flag.Parse()
 
