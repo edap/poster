@@ -10,6 +10,11 @@ import (
 	"path/filepath"
 )
 
+//Gomerger is a command line tool that allows you to merge more images in one.
+//Given a source folder containing the images, the program resizes all the images at the
+//same dimension (default is 120x90) and calculates the disposition of the images in a rectangle.
+//If the number of the images is a prime number, and one of the image can not fit into a rectangle,
+//the tool will skip it, until the total number of the images will fit into the rectangle.
 func main() {
 	var (
 		thumb_width  = flag.Int("thumb_width", 120, "the width of a single thumb")
