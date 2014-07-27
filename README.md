@@ -15,6 +15,7 @@ Usage of poster:
 ```
 
 To specify a different source directory as the current direcotry, a different destination directory as the current one, and a logfile, do as follow.
+
 `poster dest_dir=/home/username/dest source_dir=/home/username/source log_file=/home/username/my.log` 
 
 ##Installation
@@ -22,7 +23,7 @@ Assuming that you have the go toolchain installed, download the package with `go
 
 ## TODO
 
-* ~~allow only jpg~~ _done_
+* ~~provide log option~~ _done_
 * Support multiple image formats, .gif, .png, and not only jpeg
 * Use goroutine during the canvas creation
 * Provide batch resize command, without merge
