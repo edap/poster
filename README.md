@@ -1,12 +1,12 @@
-# gomerger
-Gomerger is a command line tool that allows you to merge more images in one.
+# poster
+poster is a command line tool that allows you to merge more images in one.
 Given a source folder containing the images, the program resizes all the images at the same dimension (default is 120x90) and calculates the disposition of the images in a rectangle. If the number of the images is a prime number, and one of the image can not fit into a rectangle, the tool will skip one images, until the total number of the images will fit into a  rectangle.
 
 ## Usage
-Simply run `gomerger` in the folder containing your images. If you run `gomerger -h` the default options will be displayed
+Simply run `poster` in the folder containing your images. If you run `poster -h` the default options will be displayed
 
 ```go
-Usage of gomerger:
+Usage of poster:
   -dest_dir=".": the destination directory that will contain the grid
   -log_file="stdout": specify a log file, as default it will print on stdout
   -source_dir=".": the origin directory that contains the images to compose the grid
@@ -15,10 +15,10 @@ Usage of gomerger:
 ```
 
 To specify a different source directory as the current direcotry, a different destination directory as the current one, and a logfile, do as follow.
-`gomerger dest_dir=/home/username/dest source_dir=/home/username/source log_file=/home/username/my.log` 
+`poster dest_dir=/home/username/dest source_dir=/home/username/source log_file=/home/username/my.log` 
 
 ##Installation
-Assuming that you have the go toolchain installed, download the package with `go get github.com/edapx/gomerger` and install it moving in the downloaded folder and running `go install`.
+Assuming that you have the go toolchain installed, download the package with `go get github.com/edapx/poster` and install it moving in the downloaded folder and running `go install`.
 
 ## TODO
 
