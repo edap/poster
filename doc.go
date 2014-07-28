@@ -40,7 +40,7 @@ Simply run 'poster' in the folder containing your images. If you run 'poster -h'
 
 To specify a different source directory as the current direcotry, a different destination directory as the current one, and a logfile, do as follow.
 
-	poster dest_dir=/home/username/dest source_dir=/home/username/source log_file=/home/username/my.log
+	poster -dest_dir=/home/username/dest -source_dir=/home/username/source -log_file=/home/username/my.log
 
 */
 package main
