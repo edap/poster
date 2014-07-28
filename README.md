@@ -1,3 +1,5 @@
+[![GoDoc](https://godoc.org/github.com/edap/poster?status.png)](https://godoc.org/github.com/edap/poster)
+
 # poster
 poster is a command line tool that allows you to merge more images in one.
 Given a source folder containing the images, the program resizes all the images at the same dimension (default is 120x90) and calculates the disposition of the images in a rectangle. If the number of the images is a prime number, and one of the image can not fit into a rectangle, the tool will skip one images, until the total number of the images will fit into a  rectangle.
