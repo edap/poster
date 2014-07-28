@@ -1,4 +1,5 @@
 [![GoDoc](https://godoc.org/github.com/edap/poster?status.png)](https://godoc.org/github.com/edap/poster)
+[![Build Status](https://drone.io/github.com/edap/poster/status.png)](https://drone.io/github.com/edap/poster/latest)
 
 # poster
 poster is a command line tool that allows you to merge more images in one.
