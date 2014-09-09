@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image"
 	"image/draw"
 	"image/jpeg"
@@ -30,17 +31,7 @@ func main() {
 		log.SetOutput(f)
 	}
 
-	// At least 2 images has to be present in the source directory
-	tot, images := listFiles(*source_dir)
-	if tot < 2 {
-		log.Fatal("There are less than two images in this folder")
-	}
-
-	// create the destination directory
-	destination := createDirectory(*dest_dir)
-	if destination != nil {
-		log.Fatalf("impossible to create destination directory: %v", destination)
-	}
+	tot, images := CountImagesAndVerifyPreconditions(*source_dir, *dest_dir)
 
 	//calculate the dimension of the rectangle
 	res := map[string]int{"area": tot, "height": 0, "base": 0, "skipped": 0}
@@ -55,27 +46,67 @@ func main() {
 	canvas_filename := filepath.Join(*dest_dir, randStr(20)+".jpg")
 	canvas_image := image.NewRGBA(image.Rect(0, 0, *thumb_width*res["base"], *thumb_height*res["height"]))
 
+	// sei arrivato qui, devi decidere come gestire gli errori nella goroutine che vuoi creare
+
+	c_errore := make(chan error)
+	c_immagine := make(chan Img)
+
 	// iterate through the images, resize if necessary, decode and add to the canvas
 	for _, image_path := range images {
+		// thumb := NewThumb(
+		// 	*thumb_width, *thumb_height, image_path, )
+		// thumb.SetDimension()
+
 		thumb := NewThumb(
 			*thumb_width,
 			*thumb_height,
 			image_path,
 		)
-		thumb.SetDimension()
-		img, err := thumb.DecodeIt()
+		go DoSmth(thumb)
 
-		if err != nil {
-			log.Printf("it was not possible to decode the image %s: %v", image_path, err)
-		} else {
-			x := positions[image_path][0]
-			y := positions[image_path][1]
-			draw.Draw(canvas_image, canvas_image.Bounds(), img, image.Point{x, y}, draw.Src)
-		}
+		img, err := DecodedThumb(thumb)
+		CopyToCanvas(err, positions, image_path, canvas_image, img)
 	}
+
 	toimg, _ := os.Create(canvas_filename)
 	defer toimg.Close()
 	jpeg.Encode(toimg, canvas_image, &jpeg.Options{jpeg.DefaultQuality})
 
 	log.Printf("canvas %s succesfully created", canvas_filename)
+}
+
+func DecodedThumb(i Img) (image.Image, error) {
+	i.SetDimension()
+	return i.DecodeIt()
+}
+
+func CopyToCanvas(err error, positions map[string][2]int, image_path string, canvas_image *image.RGBA, img image.Image) error {
+	if err != nil {
+		log.Printf("it was not possible to decode the image %s: %v", image_path, err)
+	} else {
+		x := positions[image_path][0]
+		y := positions[image_path][1]
+		draw.Draw(canvas_image, canvas_image.Bounds(), img, image.Point{x, y}, draw.Src)
+	}
+	return err
+}
+
+func DoSmth(c chan Img) {
+	t := <-c
+	fmt.Println(t.Width())
+}
+
+func CountImagesAndVerifyPreconditions(source_dir string, destination_dir string) (int, []string) {
+	// At least 2 images has to be present in the source directory
+	tot, images := listFiles(source_dir)
+	if tot < 2 {
+		log.Fatal("There are less than two images in this folder")
+	}
+
+	// create the destination directory
+	err := createDirectory(destination_dir)
+	if err != nil {
+		log.Fatalf("impossible to create destination directory: %v", destination_dir)
+	}
+	return tot, images
 }
