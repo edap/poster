@@ -11,6 +11,7 @@ type Img interface {
 	HasDesiredDimension() bool
 	Height() int
 	Width() int
+	Name() string
 	SetHeight(h int)
 	SetWidth(w int)
 	SetDimension() error
@@ -79,6 +80,10 @@ func (t *Thumb) DecodeIt() (image.Image, error) {
 
 func (t *Thumb) Width() int {
 	return t.width
+}
+
+func (t *Thumb) Name() string {
+	return t.img_name
 }
 
 func (t *Thumb) Height() int {

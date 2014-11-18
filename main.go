@@ -46,26 +46,16 @@ func main() {
 	canvas_filename := filepath.Join(*dest_dir, randStr(20)+".jpg")
 	canvas_image := image.NewRGBA(image.Rect(0, 0, *thumb_width*res["base"], *thumb_height*res["height"]))
 
-	// sei arrivato qui, devi decidere come gestire gli errori nella goroutine che vuoi creare
-
-	c_errore := make(chan error)
-	c_immagine := make(chan Img)
-
 	// iterate through the images, resize if necessary, decode and add to the canvas
 	for _, image_path := range images {
-		// thumb := NewThumb(
-		// 	*thumb_width, *thumb_height, image_path, )
-		// thumb.SetDimension()
 
 		thumb := NewThumb(
 			*thumb_width,
 			*thumb_height,
 			image_path,
 		)
-		go DoSmth(thumb)
-
-		img, err := DecodedThumb(thumb)
-		CopyToCanvas(err, positions, image_path, canvas_image, img)
+		// go DoSmth(thumb)
+		AsyncCopyToCanvas(thumb, positions, canvas_image)
 	}
 
 	toimg, _ := os.Create(canvas_filename)
@@ -75,9 +65,24 @@ func main() {
 	log.Printf("canvas %s succesfully created", canvas_filename)
 }
 
+//this can be removed
 func DecodedThumb(i Img) (image.Image, error) {
 	i.SetDimension()
 	return i.DecodeIt()
+}
+
+func AsyncCopyToCanvas(i Img, positions map[string][2]int, canvas_image *image.RGBA) error {
+	i.SetDimension()
+	img, err := i.DecodeIt()
+
+	if err != nil {
+		log.Printf("it was not possible to decode the image %s: %v", i.Name(), err)
+	} else {
+		x := positions[i.Name()][0]
+		y := positions[i.Name()][1]
+		draw.Draw(canvas_image, canvas_image.Bounds(), img, image.Point{x, y}, draw.Src)
+	}
+	return err
 }
 
 func CopyToCanvas(err error, positions map[string][2]int, image_path string, canvas_image *image.RGBA, img image.Image) error {
