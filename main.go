@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	//"fmt"
 	"image"
 	"image/draw"
 	"image/jpeg"
@@ -65,12 +65,6 @@ func main() {
 	log.Printf("canvas %s succesfully created", canvas_filename)
 }
 
-//this can be removed
-func DecodedThumb(i Img) (image.Image, error) {
-	i.SetDimension()
-	return i.DecodeIt()
-}
-
 func AsyncCopyToCanvas(i Img, positions map[string][2]int, canvas_image *image.RGBA) error {
 	i.SetDimension()
 	img, err := i.DecodeIt()
@@ -83,22 +77,6 @@ func AsyncCopyToCanvas(i Img, positions map[string][2]int, canvas_image *image.R
 		draw.Draw(canvas_image, canvas_image.Bounds(), img, image.Point{x, y}, draw.Src)
 	}
 	return err
-}
-
-func CopyToCanvas(err error, positions map[string][2]int, image_path string, canvas_image *image.RGBA, img image.Image) error {
-	if err != nil {
-		log.Printf("it was not possible to decode the image %s: %v", image_path, err)
-	} else {
-		x := positions[image_path][0]
-		y := positions[image_path][1]
-		draw.Draw(canvas_image, canvas_image.Bounds(), img, image.Point{x, y}, draw.Src)
-	}
-	return err
-}
-
-func DoSmth(c chan Img) {
-	t := <-c
-	fmt.Println(t.Width())
 }
 
 func CountImagesAndVerifyPreconditions(source_dir string, destination_dir string) (int, []string) {
