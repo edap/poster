@@ -5,7 +5,7 @@ import (
 )
 
 // generate is a function that produces odd numbers until the limit max.
-// It send a channel signal when the limit is reached
+// It sends a channel signal when the limit is reached
 func generate(max int, ch chan<- int) {
 	ch <- 2
 	for i := 3; i <= max; i += 2 {
@@ -25,7 +25,7 @@ func filter(in <-chan int, out chan<- int, prime int) {
 	out <- -1
 }
 
-// calcPrimeFactors return the prime factors of a number. It is derived from a slightly modified version of
+// calcPrimeFactors returns the prime factors of a number. It is derived from a slightly modified version of
 // sieve.go in Go source distribution.
 func calcPrimeFactors(number_to_factorize int) []int {
 	rv := []int{}
@@ -43,8 +43,8 @@ func calcPrimeFactors(number_to_factorize int) []int {
 	return rv
 }
 
-// getBaseAndHeight takes as argument the an array containing the prime factors of a number
-// and gives back widht and height of the rectangle
+// getBaseAndHeight takes as argument an array containing the prime factors of a number
+// and gives back width and height of the rectangle
 func getBaseAndHeight(prime_factors []int) (bool, int, int) {
 	if len(prime_factors) == 1 {
 		return false, prime_factors[0], prime_factors[0]
@@ -69,8 +69,8 @@ func getBaseAndHeight(prime_factors []int) (bool, int, int) {
 	}
 }
 
-// calculateRectangle takes as parameter the an integer, that is the total of images that should
-// compose the rectangle. If the number is a square number, the method return the side of the square as base
+// calculateRectangle takes as parameter the integer representing the total number of the images that should
+// compose the rectangle. If the number is a square number, the method returns the side of the square as base
 // and height, skipping the calculation. If it's not, the function calls itself recursively, removing one element each time
 // is not possible to find out a rectangle
 func calculateRectangle(rct map[string]int) map[string]int {
@@ -90,14 +90,14 @@ func calculateRectangle(rct map[string]int) map[string]int {
 	return rct
 }
 
-// isASquale check if a number is a square number, return the side
+// isASquale checks if a number is a square number.returns a bool and the size of the side
 func isASquare(number_to_square int) (bool, float64) {
 	side := math.Sqrt(float64(number_to_square))
 	side_without_decimals := float64(int(side))
 	return ((side - side_without_decimals) == 0), side
 }
 
-// calculatePositions takes as parameter the dimension of the desidered thumb that will compose the rectangle
+// calculatePositions takes as parameter the dimensions of the desidered thumb that will compose the rectangle
 // and the list of images to merge. It calculates the exact postion of each image in the final
 // rectangle
 func calculatePositions(rect map[string]int, images []string, thumb_width int, thumb_height int) map[string][2]int {
