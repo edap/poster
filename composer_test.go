@@ -61,7 +61,7 @@ func TestIsASquare(t *testing.T) {
 	})
 }
 
-func TestcalculateRectangle(t *testing.T) {
+func TestCalculateRectangle(t *testing.T) {
 	Convey("Given a number representing the area of a rectang, calculate base and height", t, func() {
 		Convey("when it is the pow of a number, return base and height", func() {
 			res := map[string]int{

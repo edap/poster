@@ -67,7 +67,7 @@ func createDirectory(path string) error {
 		return os.Mkdir(path, 0777)
 	}
 	if finfo.Mode().IsRegular() {
-		return fmt.Errorf("there is already a file called %g ", path)
+		return fmt.Errorf("there is already a file called %s ", path)
 	}
 	if finfo.IsDir() {
 		err := isWritableByTheUser(finfo, path)
