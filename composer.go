@@ -90,7 +90,7 @@ func calculateRectangle(rct map[string]int) map[string]int {
 	return rct
 }
 
-// isASquale checks if a number is a square number.returns a bool and the size of the side
+// isASquare checks if a number is a square number.returns a bool and the size of the side
 func isASquare(number_to_square int) (bool, float64) {
 	side := math.Sqrt(float64(number_to_square))
 	side_without_decimals := float64(int(side))

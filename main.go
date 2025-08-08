@@ -20,7 +20,6 @@ func main() {
 	)
 	flag.Parse()
 
-	// set a log file if it's required
 	if *log_file != "stdout" {
 		f, err := os.OpenFile(*log_file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
@@ -30,7 +29,6 @@ func main() {
 		log.SetOutput(f)
 	}
 
-	// At least 2 images has to be present in the source directory
 	tot, images := listFiles(*source_dir)
 	if tot < 2 {
 		log.Fatal("There are less than two images in this folder")
